@@ -67,7 +67,8 @@ function ChatScreen({ chat, messages }) {
     // Get the data from the server side rendered to give us the value immediately before we connect to firebase ( because useCollection() is async )
     else {
       // parse it cuz we stringify it on the server side
-      return JSON.parse(messages).map((message) => (
+
+      return messages.map((message) => (
         <Message key={message.id} user={message.user} message={message} />
       ));
     }

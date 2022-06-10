@@ -2,7 +2,9 @@ import {
   collection,
   doc,
   getDoc,
+  getDocFromServer,
   getDocs,
+  getDocsFromServer,
   orderBy,
   query,
 } from "firebase/firestore";
@@ -29,16 +31,17 @@ function Chat({ chat, messagess }) {
 
   // console.log(messages);
   const chatData = JSON.parse(chat);
+  const messagesData = JSON.parse(messagess);
 
   return (
     <Container>
       <Head>
-        <title>Chat with {getRecipientEmail(chatData.users, user)}</title>
+        <title>Chat with {getRecipientEmail(chatData?.users, user)}</title>
       </Head>
       <Sidebar />
       <ChatContainer>
         {/* Chat View */}
-        <ChatScreen chat={chatData} messages={messagess} />
+        <ChatScreen chat={chatData} messages={messagesData} />
       </ChatContainer>
     </Container>
   );
@@ -49,17 +52,23 @@ export default Chat;
 // context allows u to access things like the params of the URL & the Root URL when you're on the server
 export async function getServerSideProps(context) {
   // // PREP the messages on the Server
-  const q = query(
-    collection(db, "chats", context.query.id, "messages"),
-    orderBy("timestamp", "asc")
-  );
+
+  // const q = query(
+  //   collection(db, "chats", context.query.id, "messages"),
+  //   orderBy("timestamp", "asc")
+  // );
 
   // As useCollection, but this hook extracts a typed list of the firestore.QuerySnapshot.docs values, rather than the firestore.QuerySnapshot itself.
-  const querySnapshot = await getDocs(q);
+  const querySnapshot = await getDocsFromServer(
+    query(
+      collection(db, "chats", context.query.id, "messages"),
+      orderBy("timestamp", "asc")
+    )
+  );
   // querySnapshot.
   // const [messages] = useCollectionData(q);
   // messagess is an array of these objects that we altered
-  const messagess = querySnapshot.docs
+  const messagessRes = querySnapshot.docs
     .map((doc) => ({
       key: doc.id,
       id: doc.id,
@@ -74,23 +83,37 @@ export async function getServerSideProps(context) {
   //   return {};
   // }
 
-  // documentRef
-  const docRef = doc(db, "chats", context.query.id);
+  const messagess = JSON.stringify(messagessRes);
 
-  const chatRes = await getDoc(docRef);
+  // documentRef
+  // const docRef = doc(db, "chats", context.query.id);
+
+  const chatRes = await getDocFromServer(doc(db, "chats", context.query.id));
   // Prep the chats
-  const chat = {
+  const chatR = {
     id: chatRes.id,
     ...chatRes.data(),
   };
 
+  const chat = JSON.stringify(chatR);
+
+  if (!chat || !messagess) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
   return {
     // will be passed to the page component as props
     props: {
-      messagess: JSON.stringify(messagess),
-      chat: JSON.stringify(chat),
+      chat: chat,
+      messagess: messagess,
     },
   };
+
   // const chatRes = await messages
 
   // context.query.id --> the id of the document
