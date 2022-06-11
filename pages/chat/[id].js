@@ -2,9 +2,7 @@ import {
   collection,
   doc,
   getDoc,
-  getDocFromServer,
   getDocs,
-  getDocsFromServer,
   orderBy,
   query,
 } from "firebase/firestore";
@@ -15,12 +13,53 @@ import Sidebar from "../../components/Sidebar";
 import { auth, db } from "../../firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import getRecipientEmail from "../../utils/getRecipientEmail";
+import { useRouter } from "next/router";
+import {
+  useCollection,
+  useDocumentDataOnce,
+} from "react-firebase-hooks/firestore";
 
 // This is our Chat page (Messages between each users)
 // This is where server-side rendering is coming in
 // These props comes from the server side render
+// function Chat({ chat, messagess }) {
 function Chat({ chat, messagess }) {
   const [user] = useAuthState(auth);
+  // const { id } = useRouter().query;
+
+  // const q = query(collection(db, `chats/${id}/messages`), orderBy("timestamp"));
+
+  // // As useCollection, but this hook extracts a typed list of the firestore.QuerySnapshot.docs values, rather than the firestore.QuerySnapshot itself.
+  // const [messagess] = useCollection(q);
+
+  // const msgs = messagess?.docs
+  //   ?.map((doc) => ({
+  //     key: doc.id,
+  //     id: doc.id,
+  //     ...doc?.data(),
+  //   }))
+  //   ?.map((messages) => ({
+  //     ...messages,
+  //     timestamp: messages.timestamp.toDate().getTime(),
+  //   }));
+
+  // // const chatRes = getDoc(doc(db, `chats/${id}`));
+  // const [chatDoc] = useDocumentDataOnce(doc(db, `chats/${id}`));
+  // // Prep the chats
+  // const chat = {
+  //   id: chatDoc?.id,
+  //   ...chatDoc?.data(),
+  // };
+
+  // console.log(chat);
+  // console.log(msgs);
+
+  // const q = query(
+  //   collection(db, "users"),
+  //   where("email", "==", getRecipientEmail(users, user))
+  // );
+  // const [recipientSnapshot] = useCollection(q);
+
   // const router = useRouter();
   // const id = router.query;
   // const q = query(
@@ -36,7 +75,7 @@ function Chat({ chat, messagess }) {
   return (
     <Container>
       <Head>
-        <title>Chat with {getRecipientEmail(chat?.users, user)}</title>
+        <title>Chat with {getRecipientEmail(chat.users, user)}</title>
       </Head>
       <Sidebar />
       <ChatContainer>
@@ -142,6 +181,7 @@ export async function getServerSideProps(context) {
 }
 
 */
+
 export async function getServerSideProps(context) {
   // // PREP the messages on the Server
   const q = query(
@@ -170,14 +210,14 @@ export async function getServerSideProps(context) {
 
   // const chat = JSON.stringify(chatR);
 
-  if (!chat || !messagess) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
+  // if (!chat || !messagess) {
+  //   return {
+  //     redirect: {
+  //       destination: "/",
+  //       permanent: false,
+  //     },
+  //   };
+  // }
 
   return {
     // will be passed to the page component as props

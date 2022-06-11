@@ -33,7 +33,7 @@ function ChatScreen({ chat, messages }) {
 
   // chat.users --> which we prepared on the server-side rendering
   // getRecipientEmail() --> is our util function
-  const recipientEmail = getRecipientEmail(chat.users, user);
+  const recipientEmail = getRecipientEmail(chat?.users, user);
 
   const q = query(
     collection(db, "users"),
@@ -54,8 +54,8 @@ function ChatScreen({ chat, messages }) {
     if (messagesSnapshot) {
       return messagesSnapshot.docs.map((message) => (
         <Message
-          key={message.id}
-          user={message.data().user}
+          key={message?.id}
+          user={message?.data().user}
           message={{
             // spread operator -> gets the all/rest of the fields in that document
             ...message.data(),
