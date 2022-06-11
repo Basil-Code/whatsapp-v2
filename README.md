@@ -2,5 +2,5 @@
 
 ## Whatsapp Demo Link
 
-Check it out [Whatsapp Clone Link](https://markdownlivepreview.com/](https://whatsapp-v2.herokuapp.com/).
+Check it out [Whatsapp Clone Link](https://whatsapp-v2.herokuapp.com/).
 
