@@ -30,24 +30,25 @@ function Chat({ chat, messagess }) {
   // const [messages] = useCollectionData(q);
 
   // console.log(messages);
-  const chatData = JSON.parse(chat);
+  // const chatData = JSON.parse(chat);
   const messagesData = JSON.parse(messagess);
 
   return (
     <Container>
       <Head>
-        <title>Chat with {getRecipientEmail(chatData?.users, user)}</title>
+        <title>Chat with {getRecipientEmail(chat?.users, user)}</title>
       </Head>
       <Sidebar />
       <ChatContainer>
         {/* Chat View */}
-        <ChatScreen chat={chatData} messages={messagesData} />
+        <ChatScreen chat={chat} messages={messagesData} />
       </ChatContainer>
     </Container>
   );
 }
 export default Chat;
 
+/*
 // Server-side rendering to pre-fetch the props on the server before the user sees the page
 // context allows u to access things like the params of the URL & the Root URL when you're on the server
 export async function getServerSideProps(context) {
@@ -138,6 +139,54 @@ export async function getServerSideProps(context) {
   //     ...messages,
   //     timestamp: messages.timestamp.toDate(),
   //   }));
+}
+
+*/
+export async function getServerSideProps(context) {
+  // // PREP the messages on the Server
+  const q = query(
+    collection(db, `chats/${context.query.id}/messages`),
+    orderBy("timestamp")
+  );
+
+  // As useCollection, but this hook extracts a typed list of the firestore.QuerySnapshot.docs values, rather than the firestore.QuerySnapshot itself.
+  const messagess = (await getDocs(q)).docs
+    .map((doc) => ({
+      key: doc.id,
+      id: doc.id,
+      ...doc.data(),
+    }))
+    .map((messages) => ({
+      ...messages,
+      timestamp: messages.timestamp.toDate().getTime(),
+    }));
+
+  const chatRes = await getDoc(doc(db, `chats/${context.query.id}`));
+  // Prep the chats
+  const chat = {
+    id: chatRes.id,
+    ...chatRes.data(),
+  };
+
+  // const chat = JSON.stringify(chatR);
+
+  if (!chat || !messagess) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    // will be passed to the page component as props
+    props: {
+      // chat: JSON.stringify(chat),
+      chat: chat,
+      messagess: JSON.stringify(messagess),
+    },
+  };
 }
 
 const Container = styled.div`

@@ -69,7 +69,6 @@ function Sidebar() {
       // We need to check if that email exist as one of our users
       addDoc(collection(db, "chats"), {
         users: [user.email, input],
-        date: serverTimestamp(),
       });
     } else {
       alert("please enter correct email");
